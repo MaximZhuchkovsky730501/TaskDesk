@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 class User:
 
-    def __int__(self, login: string):
+    def __init__(self, login: string):
         self.login = login
 
 
@@ -25,10 +25,14 @@ class WorkWithDB:
         self.connection.close()
 
     def login(self, login: string, password:string):
+        self.open_connection()
         if password == self.runScript("select password from admin.users where login = '" + login + "'")[0]:
+            self.close_connection()
             return True
         else:
+            self.close_connection()
             return False
+
 
     def get_user_info(self, login: string):
         script = "select id, firstname, lastname from admin.users where login = '" + login + "'"
@@ -40,10 +44,8 @@ class WorkWithDB:
     def runScript(self, script: string):
         return self.run(script)
 
-    def runScript(self, script: []):
-        answer = []
-        for row in script:
-            answer.append(self.run(row))
+    def runScript(self, script: string):
+        answer = self.run(script)
         return answer
 
     def run (self, script: string):
@@ -70,7 +72,7 @@ def login():
     # Authenticate the user (e.g. check the database for the username and password)
 
     # If the user is authenticated, redirect to the dashboard
-    if login(username, password):
+    if workWithDB.login(username, password):
         user = User(username)
         return redirect('/dashboard')
     return "no"
